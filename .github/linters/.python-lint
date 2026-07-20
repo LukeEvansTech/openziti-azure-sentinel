@@ -1,0 +1,16 @@
+# Pylint config for openziti-azure-sentinel.
+# Read by super-linter (PYTHON_PYLINT_CONFIG_FILE defaults to this path).
+[MESSAGES CONTROL]
+# Missing docstrings are not enforced: pedantic for a small function-app /
+# helper-script / pytest codebase. Mirrors the sibling repos' pylint policy.
+#   C0114 missing-module-docstring
+#   C0115 missing-class-docstring
+#   C0116 missing-function-docstring
+# E0401 import-error: super-linter's pylint venv does not install
+#   requirements.txt, so the azure SDK imports are unresolvable here; real
+#   import resolution is covered by the pytest CI job.
+disable =
+    C0114,
+    C0115,
+    C0116,
+    E0401

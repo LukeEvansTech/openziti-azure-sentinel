@@ -1,0 +1,8 @@
+[codespell]
+# Preserve super-linter's default skips.
+skip = */package-lock.json,*/go.mod,*/go.sum,*.log,.git
+check-hidden =
+# Technical terms codespell mis-flags as typos:
+#   aci - Azure Container Instances (product acronym, not "ACPI")
+#   iif - the Kusto (KQL) iif() function used in the Sentinel transforms
+ignore-words-list = aci,iif

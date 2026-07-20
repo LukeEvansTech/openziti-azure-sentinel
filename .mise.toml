@@ -1,0 +1,7 @@
+[tools]
+terraform = "1.13.5"
+python = "3.12"
+tflint = "0.63.1"
+
+[settings]
+lockfile = true

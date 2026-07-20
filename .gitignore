@@ -1,0 +1,35 @@
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+override.tf
+override.tf.json
+tfplan*
+# Your deployment values live in terraform.tfvars (copy terraform.tfvars.example);
+# it is gitignored because it contains your subscription id / email.
+terraform/terraform.tfvars
+
+# Azure Functions local
+function/.python_packages/
+function/local.settings.json
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Local env
+.env
+.env.local
+
+# Zensical site build output
+site/
+.zensical/

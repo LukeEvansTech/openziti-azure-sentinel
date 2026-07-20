@@ -1,0 +1,35 @@
+# Copy to terraform.tfvars and fill in. terraform.tfvars is gitignored.
+
+subscription_id = "00000000-0000-0000-0000-000000000000"
+location        = "uksouth"
+prefix          = "ozsent"
+
+# Cost guard: set your email to create a 20/month resource-group budget
+# (billing currency) with 80%/100% spend alerts. Empty string skips the
+# budget entirely.
+budget_contact_email = ""
+# budget_amount      = 20
+
+# --- Quickstart (defaults): self-contained demo ---------------------------
+# Creates its own Log Analytics workspace + Sentinel and an OpenZiti demo
+# controller on ACI that emits real authentication events.
+# deploy_demo_controller = true
+# create_workspace       = true
+
+# --- Production shape ------------------------------------------------------
+# Target your existing Sentinel workspace and bring your own controller.
+# Flip these three together:
+# deploy_demo_controller = false
+# create_workspace       = false
+# workspace_resource_id  = "/subscriptions/<sub>/resourceGroups/<rg>/providers/Microsoft.OperationalInsights/workspaces/<name>"
+# Adjust if your environment needs it:
+# retention_in_days must be >= the target workspace's retention, or the custom
+# table create fails with InvalidParameter (see docs/troubleshooting.md):
+# retention_in_days      = 90 # match your target workspace's actual retention
+# If your target workspace is not yet Sentinel-onboarded:
+# enable_analytics_rules = false
+# On governed subscriptions with pre-registered resource providers:
+# resource_provider_registrations = "none"
+
+# Extra tags merged over the defaults (project, managedBy), e.g.:
+# tags = { environment = "demo", owner = "you" }
