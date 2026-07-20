@@ -1,0 +1,3 @@
+# Match black's line length. Super-linter's bundled default is 120, which
+# makes PYTHON_RUFF_FORMAT disagree with PYTHON_BLACK (88); pin both to 88.
+line-length = 88
