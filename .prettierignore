@@ -1,0 +1,5 @@
+# Zensical/pymdownx markdown that Prettier breaks: it de-indents the 4-space
+# admonition (!!! note) bodies into plain paragraphs and mangles the
+# `*[ABBR]: definition` abbreviation syntax into emphasis.
+docs/deployment.md
+docs/how-it-works.md
