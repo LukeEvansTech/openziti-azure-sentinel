@@ -33,3 +33,7 @@ Thumbs.db
 # Zensical site build output
 site/
 .zensical/
+
+# Diagram build dependencies (see diagrams/README.md)
+diagrams/icons.json
+diagrams/Azure_Public_Service_Icons/

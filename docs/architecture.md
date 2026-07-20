@@ -26,29 +26,7 @@ HTTPS push. That constraint drives the design:
 
 ## Data flow
 
-```mermaid
-flowchart TB
-    subgraph emit["Emit"]
-        direction LR
-        sink["OpenZiti controller v2.0+<br/>servicebus event sink<br/>(authentication, apiSession,<br/>session, circuit, entityChange)"]
-        sb["Azure Service Bus Standard<br/>queue: openziti-events"]
-        sink -- "SAS, Send-only" --> sb
-    end
-    subgraph ingest["Ingest"]
-        direction LR
-        fn["Azure Function<br/>Python, Y1 Consumption"]
-        dcr["DCE + DCR<br/>ingestion-time KQL transform"]
-        fn -- "managed identity<br/>Logs Ingestion API" --> dcr
-    end
-    subgraph analyse["Analyse"]
-        direction LR
-        law["Log Analytics / Sentinel<br/>OpenZitiEvents_CL"]
-        rules["Analytics rules<br/>+ workbook"]
-        law --> rules
-    end
-    sb -- "Service Bus trigger<br/>(Listen connection)" --> fn
-    dcr --> law
-```
+![Data flow: OpenZiti controller to Service Bus to Azure Function to DCE/DCR to the OpenZitiEvents_CL table read by Sentinel analytics rules and a workbook](assets/data-flow.png)
 
 The controller's `servicebus` sink authenticates with a Send-only SAS rule and
 writes JSON events to the `openziti-events` queue on a Service Bus Standard
