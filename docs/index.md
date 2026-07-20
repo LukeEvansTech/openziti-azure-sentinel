@@ -9,15 +9,27 @@ the whole thing: one command up, one command down.
 ## Architecture
 
 ```mermaid
-flowchart LR
-    subgraph ziti["OpenZiti controller (v2.0+)"]
-        sink["servicebus event sink<br/>(authentication, apiSession,<br/>session, circuit, entityChange)"]
+flowchart TB
+    subgraph emit["Emit"]
+        direction LR
+        sink["OpenZiti controller v2.0+<br/>servicebus event sink<br/>(authentication, apiSession,<br/>session, circuit, entityChange)"]
+        sb["Azure Service Bus Standard<br/>queue: openziti-events"]
+        sink -- "SAS, Send-only" --> sb
     end
-    sink -- "SAS, Send-only" --> sb["Azure Service Bus<br/>queue: openziti-events"]
-    sb -- "Listen connection<br/>(SB trigger)" --> fn["Azure Function<br/>(Python, Y1 Consumption)"]
-    fn -- "managed identity<br/>Logs Ingestion API" --> dcr["DCE + DCR<br/>(ingestion-time KQL transform)"]
-    dcr --> law["Log Analytics / Sentinel<br/>OpenZitiEvents_CL"]
-    law --> rules["Analytics rules + workbook"]
+    subgraph ingest["Ingest"]
+        direction LR
+        fn["Azure Function<br/>Python, Y1 Consumption"]
+        dcr["DCE + DCR<br/>ingestion-time KQL transform"]
+        fn -- "managed identity<br/>Logs Ingestion API" --> dcr
+    end
+    subgraph analyse["Analyse"]
+        direction LR
+        law["Log Analytics / Sentinel<br/>OpenZitiEvents_CL"]
+        rules["Analytics rules<br/>+ workbook"]
+        law --> rules
+    end
+    sb -- "Service Bus trigger<br/>(Listen connection)" --> fn
+    dcr --> law
 ```
 
 The controller pushes its structured JSON events to the queue over a Send-only SAS rule.
