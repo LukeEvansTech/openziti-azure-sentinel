@@ -1,5 +1,5 @@
 [project]
-site_name = "openziti-azure-sentinel"
+site_name = "OpenZiti → Azure Sentinel"
 site_description = "Ship OpenZiti events into Microsoft Sentinel via the native Service Bus event sink, an Azure Function, and the Logs Ingestion API"
 site_author = "Luke Evans"
 copyright = "Copyright 2026 Luke Evans - MIT licensed."

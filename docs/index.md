@@ -1,4 +1,4 @@
-# openziti-azure-sentinel
+# OpenZiti → Azure Sentinel
 
 Ship [OpenZiti](https://openziti.io) controller events into Microsoft Sentinel over a
 push-based, PaaS-only pipeline. OpenZiti v2.0's native Azure Service Bus event sink pushes
