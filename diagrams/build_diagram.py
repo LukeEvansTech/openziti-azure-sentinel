@@ -208,15 +208,17 @@ def data_flow():
         "Logs Ingestion API",
     )
 
-    d.zone(40, 96, 300, 440, "OPENZITI ESTATE", EGRESS_FILL, EGRESS_BORD)
+    # one row grid: cards sit on rows y=140 / 276 / 412 so every edge is a
+    # single straight run and the three zones read as aligned columns
+    d.zone(40, 96, 300, 160, "OPENZITI ESTATE", EGRESS_FILL, EGRESS_BORD)
     d.zone(480, 96, 360, 440, "AZURE  ·  INGESTION", ZONE_FILL, ZONE_BORD)
     d.zone(920, 96, 340, 440, "AZURE  ·  SENTINEL WORKSPACE", ZONE_FILL, ZONE_BORD)
 
-    ctrl = d.card(70, 170, 240, 76, "OpenZiti controller",
-                  sub="v2.0+  ·  servicebus event sink")
-    demo = d.card(70, 330, 240, 72, "Demo controller", icon="aci",
-                  sub="Container Instances  ·  optional", font_color=GREY, shadow=False,
-                  dashed=True)
+    # the demo deployment IS the controller (deploy_demo_controller stands one
+    # up on ACI) - a sub-line, not a second component
+    ctrl = d.card(70, 140, 240, 76, "OpenZiti controller",
+                  sub="v2.0+  ·  servicebus event sink<br>"
+                      "Bring your own, or the optional ACI demo")
 
     sb = d.card(510, 140, 300, 76, "Azure Service Bus", icon="servicebus",
                 sub="Standard  ·  queue: openziti-events")
@@ -225,24 +227,22 @@ def data_flow():
     dcr = d.card(510, 412, 300, 76, "DCE + DCR", icon="dcr",
                  sub="Ingestion-time KQL transform")
 
-    rules = d.card(950, 170, 280, 76, "Sentinel content", icon="sentinel",
+    rules = d.card(950, 140, 280, 76, "Sentinel content", icon="sentinel",
                    sub="2 analytics rules  ·  workbook")
     law = d.card(950, 412, 280, 76, "Log Analytics workspace", icon="loganalytics",
                  sub="OpenZitiEvents_CL  ·  Sentinel-onboarded")
 
-    # the ghost demo card is one possible controller - tie it to the real one
-    d.edge(demo, ctrl, NEUTRAL, "", exit_xy=(0.5, 0), entry_xy=(0.5, 1))
-    # ctrl (y 170..246) -> sb (y 140..216): straight run at y=195
-    d.edge(ctrl, sb, NEUTRAL, "Events  ·  SAS Send-only", tag=True, label_pos=0.15,
-           exit_xy=(1, (195 - 170) / 76), entry_xy=(0, (195 - 140) / 76))
+    # ctrl and sb share row y=140, so mid-height anchors give a straight run
+    d.edge(ctrl, sb, NEUTRAL, "Events  ·  SAS Send-only", tag=True,
+           exit_xy=(1, 0.5), entry_xy=(0, 0.5))
     # vertical in-zone hops: tags mask the line under the label (craft rule -
     # a plain label on a vertical run has the line strike through its text)
     d.edge(sb, fn, NEUTRAL, "Service Bus trigger  ·  Listen", tag=True,
            exit_xy=(0.5, 1), entry_xy=(0.5, 0))
     d.edge(fn, dcr, GREEN, "Logs Ingestion API  ·  Managed identity", tag=True,
            exit_xy=(0.5, 1), entry_xy=(0.5, 0))
-    # dcr (y 412..488) -> law (y 412..488): straight run at mid-height
-    d.edge(dcr, law, AZURE, "Projected columns", tag=True, label_pos=-0.15,
+    # dcr and law share row y=412: straight run at mid-height
+    d.edge(dcr, law, AZURE, "Projected columns", tag=True,
            exit_xy=(1, 0.5), entry_xy=(0, 0.5))
     d.edge(law, rules, AZURE, "KQL", tag=True, exit_xy=(0.5, 0), entry_xy=(0.5, 1))
 

@@ -43,7 +43,6 @@ WANT = {
     "dcr": ["01857-icon-service-Data-Collection-Rules.svg", "00001-icon-service-Monitor.svg"],
     "loganalytics": ["00009-icon-service-Log-Analytics-Workspaces.svg"],
     "sentinel": ["10248-icon-service-Azure-Sentinel.svg", "Sentinel"],
-    "aci": ["10104-icon-service-Container-Instances.svg"],
 }
 
 
