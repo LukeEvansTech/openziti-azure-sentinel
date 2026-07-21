@@ -30,8 +30,8 @@ events:
       bufferSize: 100
 ```
 
-The `servicebus` handler is **SAS-connection-string only** - it has no managed-identity
-path in the shipped code - so a **Send-only** authorisation rule's connection string goes
+The `servicebus` handler only takes a SAS connection string - there is no managed-identity
+path in the shipped code - so a Send-only authorisation rule's connection string goes
 into the config directly. Send-only is the whole point: the controller can enqueue events
 but cannot read or manage the queue.
 
@@ -44,14 +44,14 @@ Premium features.
 Buffering is what makes the queue more than a pipe. If the downstream Function is briefly
 unavailable - for example while a fresh role assignment is still propagating - events wait
 in the queue instead of being lost. The one limit to know about is backpressure at the
-source: the sink does a non-blocking send and **drops events once its `bufferSize` fills**,
+source: the sink does a non-blocking send and drops events once its `bufferSize` fills,
 logging `service bus queue full`. Raise `bufferSize` for bursty runs (see
 [troubleshooting](troubleshooting.md#ingestion-path)).
 
 ## 3. The Function forwards
 
 An **Azure Function** (Python, Y1 Consumption) is triggered by the queue. Its trigger uses a
-**Listen** connection string, not managed identity: the Consumption scale controller cannot
+Listen connection string, not managed identity: the Consumption scale controller cannot
 peek the queue over a managed identity to scale from zero, so a connection string is
 required for the trigger to fire at all.
 
@@ -98,7 +98,7 @@ source
 
 (reflowed for readability; semantically identical to the transform in terraform/monitor.tf)
 
-Keeping projection **in the DCR** rather than in the Function means the Function never has to
+Keeping projection in the DCR rather than in the Function means the Function never has to
 change when the parsed schema does: adding or renaming a column is a DCR edit, no code change
 and no redeploy.
 
@@ -121,7 +121,7 @@ Two scheduled analytics rules and a workbook read from that table:
 
 - **Authentication-failure spike** - flags an identity with more than five failed
   authentications in a five-minute bin. It keys on
-  `EventType in ("fail", "failed")`, **not on `Success`**.
+  `EventType in ("fail", "failed")`, not on `Success`.
 - **Configuration change** - fires on `entityChange` events touching `services`,
   `service-policies`, `edge-router-policies`, or `identities`.
 

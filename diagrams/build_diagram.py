@@ -17,12 +17,17 @@ the title rule and zone tints. Edge colours are semantic channels and mean the
 same thing in every figure: grey = shared-secret (SAS), green = identity
 (managed identity), Azure blue = Azure Monitor data path.
 """
+
 import html
 import json
 import pathlib
 
 BASE = pathlib.Path(__file__).parent
-ICONS = json.loads((BASE / "icons.json").read_text()) if (BASE / "icons.json").exists() else {}
+ICONS = (
+    json.loads((BASE / "icons.json").read_text())
+    if (BASE / "icons.json").exists()
+    else {}
+)
 
 # ---------------------------- design tokens ----------------------------
 # Chrome (identity only, never meaning): indigo, matching the docs site theme.
@@ -64,6 +69,11 @@ def shade(hexcolor, frac=0.30):
 class Doc:
     """One figure: build cells with the helpers, then render() to draw.io XML."""
 
+    # geometry helpers take x/y/w/h plus content, so the arg/local-count
+    # ceilings are noise here
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
+    # pylint: disable=too-many-locals
+
     def __init__(self, name, w, h):
         self.name, self.w, self.h = name, w, h
         self.cells = []
@@ -73,18 +83,22 @@ class Doc:
         self.n += 1
         return f"{p}{self.n}"
 
-    def zone(self, x, y, w, h, label, fill, bord):
+    def zone(self, x, y, w, h, label, fill, border):
         self.cells.append(
             f'<mxCell id="{self._id("z")}" value="{esc(label)}" style="rounded=1;arcSize=2;'
-            f"whiteSpace=wrap;html=1;fillColor={fill};strokeColor={bord};strokeWidth=1.5;dashed=1;"
-            f"dashPattern=6 4;verticalAlign=top;align=left;fontFamily={FONT};fontColor={bord};"
+            f"whiteSpace=wrap;html=1;fillColor={fill};"
+            f"strokeColor={border};strokeWidth=1.5;dashed=1;"
+            f"dashPattern=6 4;verticalAlign=top;align=left;"
+            f"fontFamily={FONT};fontColor={border};"
             f'fontSize=12;fontStyle=1;spacingLeft=16;spacingTop=10;letterSpacing=2;" vertex="1" '
-            f'parent="1"><mxGeometry x="{x}" y="{y}" width="{w}" height="{h}" as="geometry"/></mxCell>'
+            f'parent="1"><mxGeometry x="{x}" y="{y}" width="{w}" height="{h}" '
+            f'as="geometry"/></mxCell>'
         )
 
     def title(self, x, y, w, text, sub=""):
         self.cells.append(
-            f'<mxCell id="ttl" value="{esc(text)}" style="text;html=1;fontFamily={FONT};fontSize=20;'
+            f'<mxCell id="ttl" value="{esc(text)}" '
+            f'style="text;html=1;fontFamily={FONT};fontSize=20;'
             f'fontStyle=1;fontColor={INK};align=left;verticalAlign=top;" vertex="1" parent="1">'
             f'<mxGeometry x="{x}" y="{y}" width="{w}" height="28" as="geometry"/></mxCell>'
         )
@@ -97,12 +111,24 @@ class Doc:
             self.cells.append(
                 f'<mxCell id="sub" value="{esc(sub)}" style="text;html=1;fontFamily={FONT};'
                 f'fontSize=12;fontColor={GREY};align=left;" vertex="1" parent="1">'
-                f'<mxGeometry x="{x + 76}" y="{y + 30}" width="{w - 80}" height="18" as="geometry"/>'
+                f'<mxGeometry x="{x + 76}" y="{y + 30}" width="{w - 80}" '
+                f'height="18" as="geometry"/>'
                 f"</mxCell>"
             )
 
-    def card(self, x, y, w, h, card_title, icon=None, sub=None, font_color=INK,
-             shadow=True, dashed=False):
+    def card(
+        self,
+        x,
+        y,
+        w,
+        h,
+        card_title,
+        icon=None,
+        sub=None,
+        font_color=INK,
+        shadow=True,
+        dashed=False,
+    ):
         cid = self._id("c")
         isz = min(h - 20, 42)
         spacing = (isz + 26) if icon else 14
@@ -111,7 +137,10 @@ class Doc:
         if sub:
             lab += f'<br><font color="{GREY}" style="font-size:10px">{sub}</font>'
         label = (
-            lab.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
+            lab.replace("&", "&amp;")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+            .replace('"', "&quot;")
         )
         sh = "shadow=1;" if shadow else ""
         da = "dashed=1;dashPattern=4 4;" if dashed else ""
@@ -132,8 +161,17 @@ class Doc:
             )
         return cid
 
-    def edge(self, src, tgt, color, label="", exit_xy=None, entry_xy=None, tag=False,
-             label_pos=None):
+    def edge(
+        self,
+        src,
+        tgt,
+        color,
+        label="",
+        exit_xy=None,
+        entry_xy=None,
+        tag=False,
+        label_pos=None,
+    ):
         if tag and label:
             box = f"labelBackgroundColor={tint(color)};labelBorderColor={color};fontStyle=1;"
             fcol = shade(color)
@@ -189,7 +227,8 @@ class Doc:
             f'<mxGraphModel dx="1400" dy="900" grid="0" gridSize="10" guides="1" tooltips="1" '
             f'connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="{self.w}" '
             f'pageHeight="{self.h}" math="0" shadow="0">\n<root>\n<mxCell id="0"/>\n'
-            f'<mxCell id="1" parent="0"/>\n{body}\n</root>\n</mxGraphModel>\n</diagram>\n</mxfile>\n'
+            f'<mxCell id="1" parent="0"/>\n{body}\n</root>\n'
+            f"</mxGraphModel>\n</diagram>\n</mxfile>\n"
         )
 
 
@@ -203,7 +242,10 @@ def build(doc):
 def data_flow():
     d = Doc("data-flow", 1300, 660)
     d.title(
-        40, 28, 1220, "openziti-azure-sentinel  ·  Data flow",
+        40,
+        28,
+        1220,
+        "openziti-azure-sentinel  ·  Data flow",
         "OpenZiti events into Microsoft Sentinel  ·  Service Bus sink  ·  Function  ·  "
         "Logs Ingestion API",
     )
@@ -216,41 +258,108 @@ def data_flow():
 
     # the demo deployment IS the controller (deploy_demo_controller stands one
     # up on ACI) - a sub-line, not a second component
-    ctrl = d.card(70, 140, 240, 76, "OpenZiti controller",
-                  sub="v2.0+  ·  servicebus event sink<br>"
-                      "Bring your own, or the optional ACI demo")
+    ctrl = d.card(
+        60,
+        140,
+        260,
+        76,
+        "OpenZiti controller",
+        icon="openziti",
+        sub="v2.0+  ·  servicebus event sink<br>Yours, or the optional ACI demo",
+    )
 
-    sb = d.card(510, 140, 300, 76, "Azure Service Bus", icon="servicebus",
-                sub="Standard  ·  queue: openziti-events")
-    fn = d.card(510, 276, 300, 76, "Azure Function", icon="function",
-                sub="Python  ·  Y1 Consumption")
-    dcr = d.card(510, 412, 300, 76, "DCE + DCR", icon="dcr",
-                 sub="Ingestion-time KQL transform")
+    sb = d.card(
+        510,
+        140,
+        300,
+        76,
+        "Azure Service Bus",
+        icon="servicebus",
+        sub="Standard  ·  queue: openziti-events",
+    )
+    fn = d.card(
+        510,
+        276,
+        300,
+        76,
+        "Azure Function",
+        icon="function",
+        sub="Python  ·  Y1 Consumption",
+    )
+    dcr = d.card(
+        510, 412, 300, 76, "DCE + DCR", icon="dcr", sub="Ingestion-time KQL transform"
+    )
 
-    rules = d.card(950, 140, 280, 76, "Sentinel content", icon="sentinel",
-                   sub="2 analytics rules  ·  workbook")
-    law = d.card(950, 412, 280, 76, "Log Analytics workspace", icon="loganalytics",
-                 sub="OpenZitiEvents_CL  ·  Sentinel-onboarded")
+    rules = d.card(
+        950,
+        140,
+        280,
+        76,
+        "Sentinel content",
+        icon="sentinel",
+        sub="2 analytics rules  ·  workbook",
+    )
+    law = d.card(
+        950,
+        412,
+        280,
+        76,
+        "Log Analytics workspace",
+        icon="loganalytics",
+        sub="OpenZitiEvents_CL  ·  Sentinel-onboarded",
+    )
 
     # ctrl and sb share row y=140, so mid-height anchors give a straight run
-    d.edge(ctrl, sb, NEUTRAL, "Events  ·  SAS Send-only", tag=True,
-           exit_xy=(1, 0.5), entry_xy=(0, 0.5))
+    d.edge(
+        ctrl,
+        sb,
+        NEUTRAL,
+        "Events  ·  SAS Send-only",
+        tag=True,
+        exit_xy=(1, 0.5),
+        entry_xy=(0, 0.5),
+    )
     # vertical in-zone hops: tags mask the line under the label (craft rule -
     # a plain label on a vertical run has the line strike through its text)
-    d.edge(sb, fn, NEUTRAL, "Service Bus trigger  ·  Listen", tag=True,
-           exit_xy=(0.5, 1), entry_xy=(0.5, 0))
-    d.edge(fn, dcr, GREEN, "Logs Ingestion API  ·  Managed identity", tag=True,
-           exit_xy=(0.5, 1), entry_xy=(0.5, 0))
+    d.edge(
+        sb,
+        fn,
+        NEUTRAL,
+        "Service Bus trigger  ·  Listen",
+        tag=True,
+        exit_xy=(0.5, 1),
+        entry_xy=(0.5, 0),
+    )
+    d.edge(
+        fn,
+        dcr,
+        GREEN,
+        "Logs Ingestion API  ·  Managed identity",
+        tag=True,
+        exit_xy=(0.5, 1),
+        entry_xy=(0.5, 0),
+    )
     # dcr and law share row y=412: straight run at mid-height
-    d.edge(dcr, law, AZURE, "Projected columns", tag=True,
-           exit_xy=(1, 0.5), entry_xy=(0, 0.5))
+    d.edge(
+        dcr,
+        law,
+        AZURE,
+        "Projected columns",
+        tag=True,
+        exit_xy=(1, 0.5),
+        entry_xy=(0, 0.5),
+    )
     d.edge(law, rules, AZURE, "KQL", tag=True, exit_xy=(0.5, 0), entry_xy=(0.5, 1))
 
-    d.legend(70, 570, [
-        (NEUTRAL, "SAS connection string"),
-        (GREEN, "Managed identity (Entra)"),
-        (AZURE, "Azure Monitor data path"),
-    ])
+    d.legend(
+        70,
+        570,
+        [
+            (NEUTRAL, "SAS connection string"),
+            (GREEN, "Managed identity (Entra)"),
+            (AZURE, "Azure Monitor data path"),
+        ],
+    )
     build(d)
 
 
