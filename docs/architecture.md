@@ -142,6 +142,9 @@ apply in this mode:
   the resource group gone - so it never claims a clean teardown that left
   resources behind.
 
+Each script has a PowerShell twin (`deploy.ps1`, `verify.ps1`, `teardown.ps1`)
+with the same behaviour, for Windows users.
+
 ## Out of scope
 
 This is a reference deployment to adapt, not a hardened production topology. It

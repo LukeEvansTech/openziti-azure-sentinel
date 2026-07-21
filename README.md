@@ -54,6 +54,11 @@ cp terraform/terraform.tfvars.example terraform/terraform.tfvars
 ./scripts/teardown.sh
 ```
 
+On Windows (or anywhere with PowerShell), every script has a PowerShell twin
+with the same behaviour and retry logic - run `./scripts/deploy.ps1`,
+`./scripts/verify.ps1`, and `./scripts/teardown.ps1` instead. Both Windows
+PowerShell 5.1 and PowerShell 7+ work.
+
 The Function forwards to the Logs Ingestion API using its managed identity, which
 is granted **Monitoring Metrics Publisher** on the DCR. That role assignment can
 take up to ~30 minutes to propagate: an initial `403` from the Function is
