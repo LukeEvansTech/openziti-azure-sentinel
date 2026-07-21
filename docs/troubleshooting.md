@@ -1,6 +1,6 @@
 # Troubleshooting
 
-Field-tested findings from building and running this pipeline, grouped by area.
+What broke while building and running this pipeline, grouped by area.
 Each entry is a symptom, its cause, and the fix.
 
 For the full data flow and design rationale, see
@@ -19,7 +19,7 @@ For the full data flow and design rationale, see
 - **Uploads fail with HTTP `404`.**
   - Cause: a wrong DCR immutable ID, or a stream-name mismatch. The stream must be
     `Custom-OpenZitiEvents_CL` in the DCR `stream_declaration`, the DCR
-    `output_stream`, **and** the Function's upload call.
+    `output_stream`, and the Function's upload call.
   - Fix: make all three identical, and confirm the Function is reading the DCR
     immutable ID (not the DCR resource ID) from its app settings.
 
@@ -44,9 +44,9 @@ For the full data flow and design rationale, see
     and the packaged example config.
 
 - **The DCR transform rejects `coalesce()`.**
-  - Cause: the ingestion-time `transformKql` runs a restricted KQL subset that has
-    no `coalesce()` (`Runtime scalar function provider not found for function:
-coalesce`).
+  - Cause: the ingestion-time `transformKql` runs a restricted KQL subset that
+    has no `coalesce()` and rejects it with
+    `Runtime scalar function provider not found for function: coalesce`.
   - Fix: use `iif(isnotempty(tostring(x)), tostring(x), tostring(y))`. This is
     needed to reconcile OpenZiti's `event_type` (snake_case) vs `eventType`
     (camelCase, on `entityChange`) split.
@@ -60,7 +60,7 @@ coalesce`).
 ## Targeting an existing workspace
 
 - **Custom table create fails with `400 InvalidParameter` on retention.**
-  - Cause: the table's `totalRetentionInDays` must be **>=** the target
+  - Cause: the table's `totalRetentionInDays` must be >= the target
     workspace's retention. Pointing at a workspace with, say, 90-day retention
     while the table is set to 30 fails. A self-created workspace never hits this
     because it is created at the same retention.
@@ -82,9 +82,8 @@ coalesce`).
     Contributor. Everything else (table, DCR, Function, controller) is covered by
     Contributor.
 
-- **Pre-flight checklist before deploying into a governed subscription.** Not a
-  failure entry - a preventive checklist worth running before the first deploy
-  into a governed subscription:
+- **Pre-flight checklist.** Not a failure entry - four checks worth running
+  before the first deploy into a governed subscription:
   - Resolve the workspace ARM ID from its customerId GUID:
     `az monitor log-analytics workspace list --query "[?customerId=='<guid>']"`.
   - Confirm resource-provider registration.
@@ -219,8 +218,9 @@ coalesce`).
   - Cause: some subscription offers restrict small VM SKUs entirely (restriction
     type Location) even with healthy vCPU quota. This is a platform
     SKU-enablement matter tied to the offer, not an Azure Policy.
-  - Fix: resolve it with a SKU/quota support request or a VM-capable subscription
-    - or run the demo controller on ACI, which is why this repository does.
+  - Fix: resolve it with a SKU/quota support request or a VM-capable
+    subscription, or run the demo controller on ACI, which is why this
+    repository does.
 
 - **First apply fails with `MissingSubscriptionRegistration`.**
   - Cause: with `resource_provider_registrations = "none"` on a governed

@@ -4,7 +4,8 @@ This deployment ships OpenZiti controller events into Microsoft Sentinel over a
 push-based, PaaS-only pipeline. This page explains why it is shaped that way and
 what each component is doing.
 
-Field-tested failure modes live in [troubleshooting.md](troubleshooting.md).
+The failure modes hit while building and running this live in
+[troubleshooting.md](troubleshooting.md).
 
 ## Why push-based
 
@@ -17,10 +18,10 @@ HTTPS push. That constraint drives the design:
   plus a Data Collection Rule reading a tailed file. That is more moving parts on
   the controller host and more assurance surface.
 - The v2.0 `servicebus` sink lets the controller push events directly into a
-  managed queue. No host agent, no log-file plumbing, and the queue provides
-  durable buffering: if the downstream Function is briefly unavailable (for
-  example while a fresh role assignment propagates), events wait in the queue
-  rather than being lost.
+  managed queue, with no host agent and no log-file plumbing. The queue also
+  provides durable buffering: if the downstream Function is briefly unavailable
+  (for example while a fresh role assignment propagates), events wait in the
+  queue rather than being lost.
 - Everything downstream of the controller is managed Azure PaaS, so there is no
   VM to patch in the ingestion path.
 
@@ -56,8 +57,8 @@ in the design.
 The Function runs on a **Y1 Consumption** plan. Flex Consumption was tried first
 and, while it deployed and published cleanly, its host never actually executed
 the worker - zero telemetry, and the queue never drained. Y1 consumed the queue
-immediately. The Service Bus trigger uses a **Listen connection string, not
-managed identity**, because the Consumption scale controller cannot peek the
+immediately. The Service Bus trigger uses a Listen connection string, not
+managed identity, because the Consumption scale controller cannot peek the
 queue over a managed identity to scale from zero. The Function's own upload to
 the Logs Ingestion API still uses managed identity. The Functions runtime
 storage (`AzureWebJobsStorage`) is a keyed connection string, so that storage
@@ -65,10 +66,10 @@ account keeps shared keys enabled.
 
 ### Ingestion design
 
-The Function is a deliberately trivial, schema-stable passthrough: it pulls the
+The Function is a thin, schema-stable passthrough: it pulls the
 event `timestamp` into `TimeGenerated` and puts the whole event object into a
-`RawData` dynamic column, then uploads. **All column projection lives in the DCR
-transform**, so the parsed schema can change with a DCR edit and no code change
+`RawData` dynamic column, then uploads. All column projection lives in the DCR
+transform, so the parsed schema can change with a DCR edit and no code change
 or redeploy. The transform uses
 `iif(isnotempty(tostring(x)), tostring(x), tostring(y))` rather than
 `coalesce()`, because the ingestion-time KQL subset does not provide
@@ -90,8 +91,8 @@ Instances**, not a VM, for two reasons: it removes any VM dependency, and some
 subscription offers restrict small VM SKUs entirely (see the troubleshooting
 notes), which would block a VM-based demo outright.
 
-Running the `ziti-controller` image on ACI has one sharp edge: **its persistent
-state cannot live directly on the Azure Files (CIFS) mount.** ziti's PKI store
+Running the `ziti-controller` image on ACI has one sharp edge: its persistent
+state cannot live directly on the Azure Files (CIFS) mount. ziti's PKI store
 hard-links the intermediate CA bundle (`os.Link`), which CIFS does not support,
 and the bbolt/raft database uses mmap, which is unsafe over CIFS. So bootstrap
 runs on container-local disk, and only an identity snapshot (PKI + config) is
@@ -116,16 +117,16 @@ the table exists and Sentinel would reject the query.
 
 With `create_workspace = false` and a `workspace_resource_id`, the pipeline
 writes into an existing central Sentinel workspace instead of creating one.
-Terraform then **never creates, modifies, or destroys that workspace**; it only
+Terraform then never creates, modifies, or destroys that workspace; it only
 adds the custom table, DCE, DCR, analytics rules, and workbook. Two constraints
 apply in this mode:
 
-- **Retention.** The custom table's total retention must be **>=** the target
+- **Retention.** The custom table's total retention must be >= the target
   workspace's retention, or the table create fails with a 400. Set
   `retention_in_days` to match or exceed the workspace.
 - **Permissions.** Creating the DCR role assignment needs
-  `Microsoft.Authorization/roleAssignments/write`, which **Contributor does not
-  include**. Grant **User Access Administrator** or **Owner** on the scope
+  `Microsoft.Authorization/roleAssignments/write`, which Contributor does not
+  include. Grant **User Access Administrator** or **Owner** on the scope
   alongside Contributor.
 
 ## Lifecycle
@@ -144,7 +145,7 @@ apply in this mode:
 ## Out of scope
 
 This is a reference deployment to adapt, not a hardened production topology. It
-deliberately does not cover HA or multi-region controllers, private networking
+does not cover HA or multi-region controllers, private networking
 hardening (private endpoints, VNet-integrated Function), or expanding the log
 sources beyond the OpenZiti controller event stream. Those are the graduation
 path once the pipeline is adopted.

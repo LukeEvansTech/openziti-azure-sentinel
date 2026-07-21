@@ -47,7 +47,7 @@ cp terraform/terraform.tfvars.example terraform/terraform.tfvars
 
 ### Demo security posture
 
-The demo controller is deliberately reasonable but unhardened, and it is internet-facing:
+The demo controller takes sensible defaults but is not hardened, and it faces the internet:
 
 - It gets a public ACI FQDN with port `1280` (the edge/management API) exposed to the
   internet. Retrieve it with `terraform output -raw controller_fqdn`.
@@ -88,7 +88,7 @@ events:
       bufferSize: 100
 ```
 
-The `servicebus` handler is **SAS-connection-string only** - it does not support managed
+The `servicebus` handler only takes a SAS connection string - it does not support managed
 identity - so the Send-only rule's connection string goes into the controller config
 directly.
 
@@ -98,9 +98,9 @@ Set `create_workspace = false` and supply `workspace_resource_id` to write into 
 central Sentinel workspace. Terraform never creates, modifies, or destroys that workspace; it
 only adds the custom table, DCE, DCR, analytics rules, and workbook.
 
-- `retention_in_days` must be **>=** the target workspace's retention, or the custom table
+- `retention_in_days` must be >= the target workspace's retention, or the custom table
   create fails.
-- Deploying with **Contributor** alone fails on the DCR role assignment - it needs **User
+- Deploying with Contributor alone fails on the DCR role assignment - it needs **User
   Access Administrator** or **Owner** on the scope.
 - If the target workspace is not Sentinel-onboarded, set `enable_analytics_rules = false`
   (the scheduled rules require Sentinel).

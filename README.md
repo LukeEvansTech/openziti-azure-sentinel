@@ -71,8 +71,8 @@ python scripts/inject_sample_events.py       # one batch; pass a count to send m
 
 ### Demo security posture
 
-The demo controller is deliberately reasonable but unhardened, and it is
-internet-facing. Be aware that:
+The demo controller takes sensible defaults but is not hardened, and it faces
+the internet:
 
 - It gets a public ACI FQDN with port `1280` (the edge/management API) exposed to
   the internet. Retrieve the endpoint with
@@ -115,7 +115,7 @@ events:
       bufferSize: 100
 ```
 
-The servicebus handler is **SAS-connection-string only** - it does not support
+The servicebus handler only takes a SAS connection string - it does not support
 managed identity - so the Send-only rule's connection string goes into the
 controller config directly.
 
@@ -126,9 +126,9 @@ an existing central Sentinel workspace. Terraform never creates, modifies, or
 destroys that workspace; it only adds the custom table, DCE, DCR, analytics
 rules, and workbook.
 
-- `retention_in_days` must be **>=** the target workspace's retention, or the
+- `retention_in_days` must be >= the target workspace's retention, or the
   custom table create fails.
-- Deploying with **Contributor** alone fails on the DCR role assignment - it
+- Deploying with Contributor alone fails on the DCR role assignment - it
   needs **User Access Administrator** or **Owner** on the scope.
 - If the target workspace is not Sentinel-onboarded, set
   `enable_analytics_rules = false` (the scheduled rules require Sentinel).
@@ -163,7 +163,7 @@ In demo mode the running cost is dominated by the ACI controller group: roughly
 - **Azure Function** on a Y1 Consumption plan - near-zero at demo event volume.
 - **Log Analytics** ingestion for the events that land.
 
-The resource-group budget alert is opt-in and does **nothing** unless you set
+The resource-group budget alert is opt-in and does nothing unless you set
 `budget_contact_email`. With it set, Terraform creates a monthly budget (default
 `budget_amount` of 20 in your billing currency) with alerts at the 80% and 100%
 thresholds. Without it, there is no automatic spend guardrail - the only backstops
@@ -187,10 +187,10 @@ on `EventType`, not `Success`.
 
 ## Troubleshooting
 
-Field-tested notes - DCR/RBAC propagation, the ACI/CIFS PKI snapshot, retention
-conflicts, and Sentinel rule-id cooldowns after teardown - are collected in
-[`docs/troubleshooting.md`](docs/troubleshooting.md). A deeper walkthrough of the
-pipeline is in [`docs/architecture.md`](docs/architecture.md).
+The problems hit while building this - DCR/RBAC propagation, the ACI/CIFS PKI
+snapshot, retention conflicts, Sentinel rule-id cooldowns after teardown - are
+written up in [`docs/troubleshooting.md`](docs/troubleshooting.md). A deeper
+walkthrough of the pipeline is in [`docs/architecture.md`](docs/architecture.md).
 
 ## License
 

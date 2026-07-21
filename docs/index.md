@@ -18,18 +18,19 @@ lives in the DCR.
 
 ## What you get
 
-- An **Azure Service Bus** Standard queue (`openziti-events`) for durable buffering.
-- A **Python Azure Function** (Y1 Consumption) that forwards each event.
-- A **DCE + DCR** with an ingestion-time KQL transform.
-- The **`OpenZitiEvents_CL`** Sentinel custom table.
-- **Two scheduled analytics rules** (authentication-failure spike, configuration change).
-- A **workbook** with event-volume, authentication, and configuration-change panels.
-- An **optional self-contained demo controller** on Azure Container Instances that emits
-  real authentication events, so the pipeline can be seen working end-to-end.
+- An Azure Service Bus Standard queue (`openziti-events`) for durable buffering.
+- A Python Azure Function (Y1 Consumption) that forwards each event.
+- A DCE + DCR with an ingestion-time KQL transform.
+- The `OpenZitiEvents_CL` Sentinel custom table.
+- Two scheduled analytics rules (authentication-failure spike, configuration change).
+- A workbook with event-volume, authentication, and configuration-change panels.
+- An optional self-contained demo controller on Azure Container Instances that emits
+  real authentication events, so you can watch the pipeline work end-to-end.
 
 ## Where to go next
 
 - [How it works](how-it-works.md) - one event's journey from controller to Sentinel.
 - [Deployment](deployment.md) - quickstart, production shape, and the variables.
 - [Architecture](architecture.md) - why the pipeline is shaped this way.
-- [Troubleshooting](troubleshooting.md) - field-tested failure modes and their fixes.
+- [Troubleshooting](troubleshooting.md) - the failure modes hit while building this,
+  and their fixes.
