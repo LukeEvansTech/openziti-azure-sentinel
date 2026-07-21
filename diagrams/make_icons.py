@@ -18,6 +18,7 @@ Rasteriser: auto-detected, first available wins - rsvg-convert
 
 Run: `python3 diagrams/make_icons.py` -> writes diagrams/icons.json.
 """
+
 import base64
 import glob
 import json
@@ -26,6 +27,7 @@ import pathlib
 import shutil
 import subprocess
 import tempfile
+import urllib.request
 
 BASE = pathlib.Path(__file__).parent
 ICONS_DIR = os.environ.get(
@@ -40,9 +42,21 @@ PX = 256  # rasterise size; displayed small but the 2x export stays crisp
 WANT = {
     "servicebus": ["10836-icon-service-Azure-Service-Bus.svg", "Service-Bus"],
     "function": ["10029-icon-service-Function-Apps.svg", "Function-Apps"],
-    "dcr": ["01857-icon-service-Data-Collection-Rules.svg", "00001-icon-service-Monitor.svg"],
+    "dcr": [
+        "01857-icon-service-Data-Collection-Rules.svg",
+        "00001-icon-service-Monitor.svg",
+    ],
     "loganalytics": ["00009-icon-service-Log-Analytics-Workspaces.svg"],
     "sentinel": ["10248-icon-service-Azure-Sentinel.svg", "Sentinel"],
+}
+
+# Brand marks not in the Azure set, fetched as ready-made PNGs from a stable
+# URL (GitHub serves an org's avatar at github.com/<org>.png). The OpenZiti
+# mark identifies the OpenZiti controller card in the figure; the logo remains
+# the OpenZiti project's - it is embedded in the built figure, not
+# redistributed as an asset.
+BRAND_MARKS = {
+    "openziti": f"https://github.com/openziti.png?size={PX}",
 }
 
 
@@ -127,6 +141,13 @@ def main():
             continue
         cat[name] = rasterise(svg, name)
         report.append(f"  {name:14s} <- {os.path.relpath(svg, ICONS_DIR)}")
+    for name, url in BRAND_MARKS.items():
+        try:
+            with urllib.request.urlopen(url, timeout=30) as resp:  # noqa: S310
+                cat[name] = base64.b64encode(resp.read()).decode()
+            report.append(f"  {name:14s} <- {url}")
+        except OSError as exc:
+            report.append(f"  MISSING: {name} ({url}: {exc})")
     OUT.write_text(json.dumps(cat))
     print(f"Rasteriser: {RAST_NAME}")
     print(f"Wrote {OUT} with {len(cat)} icons total:")

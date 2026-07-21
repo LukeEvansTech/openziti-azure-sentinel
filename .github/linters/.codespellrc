@@ -1,6 +1,8 @@
 [codespell]
-# Preserve super-linter's default skips.
-skip = */package-lock.json,*/go.mod,*/go.sum,*.log,.git
+# Preserve super-linter's default skips. *.drawio is generated XML full of
+# base64 icon data (random letter pairs read as "words") - built by
+# diagrams/build_diagram.py, never hand-written prose.
+skip = */package-lock.json,*/go.mod,*/go.sum,*.log,.git,*.drawio
 check-hidden =
 # Technical terms codespell mis-flags as typos:
 #   aci - Azure Container Instances (product acronym, not "ACPI")
