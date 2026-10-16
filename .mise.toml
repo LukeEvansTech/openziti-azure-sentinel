@@ -1,5 +1,5 @@
 [tools]
-terraform = "1.16.5"
+terraform = "1.16.6"
 python = "3.15.0"
 tflint = "0.64.0"
 
