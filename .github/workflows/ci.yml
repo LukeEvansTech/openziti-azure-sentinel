@@ -38,3 +38,8 @@ jobs:
           python-version: "3.15"
       - run: pip install -r function/requirements.txt pytest
       - run: pytest function/tests -v
+      # Teardown completion gate, against stubbed terraform/az (no Azure calls).
+      # The runner image ships jq and pwsh, so both script twins are exercised.
+      - run: bash scripts/tests/test_teardown.sh
+        env:
+          REQUIRE_PWSH: "1"
