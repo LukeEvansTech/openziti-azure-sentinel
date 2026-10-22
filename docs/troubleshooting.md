@@ -196,6 +196,18 @@ For the full data flow and design rationale, see
     still orphans a soft-deleted workspace, it is harmless and auto-purges in
     14 days.
 
+- **Teardown reports success while resources remain.**
+  - Cause: a failed `terraform destroy` still strips root outputs from state, so
+    on a re-run `terraform output -raw resource_group_name` prints its
+    "No outputs found" warning on stdout instead of a name. A completion check
+    against that text, or against the wrong default subscription, or one that
+    treats an `az` error as "gone", reads as a pass.
+  - Fix: teardown resolves the subscription, resource group, and workspace
+    names from configuration and `terraform.tfvars` through `terraform console`,
+    refuses to run if they do not look like a subscription GUID and an `rg-`
+    name, passes `--subscription` on every `az` call, and reports success only
+    when `az group exists` returns an explicit `false`.
+
 - **`az monitor log-analytics query -w` returns nothing / errors on the ID.**
   - Cause: the query API wants the workspace **customerId** GUID, not the ARM
     resource ID.
@@ -221,6 +233,19 @@ For the full data flow and design rationale, see
   - Fix: resolve it with a SKU/quota support request or a VM-capable
     subscription, or run the demo controller on ACI, which is why this
     repository does.
+
+- **`terraform plan` works but apply or teardown fails with `401 RequestDisallowedByAzure`.**
+  - Cause: the tenant enforces multifactor authentication for Azure write
+    operations. A plain `az login` token is enough to read, so `plan` succeeds,
+    but writes are rejected with
+    `RequestDisallowedByAzure ... without authenticating through MFA`.
+  - Fix: log in again with a claims challenge that demands MFA:
+
+    ```sh
+    az login --tenant <tenant-id> \
+      --scope "https://management.core.windows.net//.default" \
+      --claims-challenge "eyJhY2Nlc3NfdG9rZW4iOnsiYWNycyI6eyJlc3NlbnRpYWwiOnRydWUsInZhbHVlcyI6WyJwMSJdfX19"
+    ```
 
 - **First apply fails with `MissingSubscriptionRegistration`.**
   - Cause: with `resource_provider_registrations = "none"` on a governed
