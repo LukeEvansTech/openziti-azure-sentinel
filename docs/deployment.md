@@ -13,7 +13,9 @@ workspace with Sentinel onboarded.
 
 Prerequisites:
 
-- Azure CLI, logged in (`az login`)
+- Azure CLI, logged in (`az login`; see
+  [Troubleshooting](troubleshooting.md#subscriptions-and-providers) if writes fail with an MFA error)
+- `jq` (used by `teardown.sh`)
 - Terraform >= 1.12
 - Azure Functions Core Tools (`func`)
 - Python 3.12
