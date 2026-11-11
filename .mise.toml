@@ -1,7 +1,7 @@
 [tools]
 terraform = "1.17.1"
 python = "3.15.2"
-tflint = "0.65.0"
+tflint = "0.66.0"
 
 [settings]
 lockfile = true
